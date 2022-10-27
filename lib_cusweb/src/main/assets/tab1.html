@@ -13,30 +13,19 @@
     <script src="https://unpkg.com/vue@2.6/dist/vue.min.js"></script>
     <script src="https://unpkg.com/vant@2.12/lib/vant.min.js"></script>
 
-
-    <script src="./hybird/ios_interface.js"></script>
-    <script src="./hybird/android_interface.js"></script>
-    <script src="./hybird/hybrid_interface.js"></script>
-
+    <script src=" https://home.onekdrug.com/jsinterfaces/hybird/ios_interface.js"></script>
+    <script src=" https://home.onekdrug.com/jsinterfaces/hybird/android_interface.js"></script>
+    <script src=" https://home.onekdrug.com/jsinterfaces/hybird/hybrid_interface.js"></script>
   </head>
-
   <body>
     <noscript></noscript>
-    <h1 style="text-align:center">全屏登录页</h1>
+    <h1 style="text-align:center">菜单及主页</h1>
     <div id="main">
-      <van-cell-group>
-        <van-field v-model="value" label="文本" placeholder="请输入" />
-      </van-cell-group>
-      </br>
       <van-button type="primary" @click="openBaidu">打开百度</van-button>
-      </br>
-      <van-button type="primary" @click="openMainPage">打开首页</van-button>
     </div>
   </body>
-
   <script type="text/javascript">
     Vue.use(vant);
-
     var main = new Vue({
       el: "#main",
       data: {
@@ -44,23 +33,14 @@
       },
 
       created() {
-        // 获取设备信息
-        let devStr = hybrid.getDevice();
-        console.info(devStr);
         // 通知页面初始化完成
         hybrid.onInitializationComplete();
-
       },
 
       methods: {
-
         openBaidu() {
           hybrid.openWindow('https://www.baidu.com/' );
-        },
-        openMainPage() {
-          hybrid.openWindow('appbox://main');
         }
-
       },
 
     });

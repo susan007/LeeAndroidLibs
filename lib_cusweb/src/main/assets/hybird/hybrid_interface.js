@@ -82,17 +82,17 @@ function getDevice(){
 /* JS 跳转其他页面 */
 function openWindow(url,type){
     try {
-         switch (type) {
-           case "pushAndRemove":
-             window.history.replaceState(null, document.title, url);
-             history.go(0);
-             break;
-           case "pushAndRemoveAll":
-             break;
-           default:
-             window.location.href = url;
-             break;
-         }
+            switch (type) {
+              case "pushAndRemove":
+                window.history.replaceState(null, document.title, url);
+                history.go(0);
+                break;
+              case "pushAndRemoveAll":
+                break;
+              default:
+                window.location.href = url;
+                break;
+            }
     } catch (exception) {
         console.error(exception);
      }
@@ -106,6 +106,15 @@ function closeCurrentWindow(bool){
         console.error(exception);
      }
   }
+
+/* 检查应用是否需要升级 */
+function checkVersion(){
+        try {
+            console.log("********** 检查应用升级 **********")
+        } catch (exception) {
+            console.error(exception);
+        }
+}
 
 /* JS 页面加载完成通知 */
 function onInitializationComplete(){
@@ -130,6 +139,7 @@ function onInitializationComplete(){
     println:println,  //JS 打印设备日志
     openWindow:openWindow,//JS 打开其他页面(url,打开类型) push 压入一个新页面 ; pushAndRemove 移除当前页 打开新页面 ; pushAndRemoveAll 移除所有历史页面 打开新页面
     closeCurrentWindow:closeCurrentWindow,//JS 关闭当前页  false - 强制关闭当前页 ; true - 强制整个关闭应用
+    checkVersion:checkVersion,// 检查App是否需要升级
 
     onInitializationComplete:onInitializationComplete,  //JS 通知页面初始化加载完成
   }

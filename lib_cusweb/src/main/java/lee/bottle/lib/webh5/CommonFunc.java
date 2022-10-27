@@ -1,77 +1,20 @@
 package lee.bottle.lib.webh5;
 
 import android.annotation.SuppressLint;
-import android.app.Application;
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.os.Build;
 import android.view.View;
-import android.webkit.CookieManager;
 import android.webkit.WebSettings;
-import android.webkit.WebView;
 
-import lee.bottle.lib.toolset.log.LLog;
-import lee.bottle.lib.toolset.util.AppUtils;
-
-import static lee.bottle.lib.toolset.os.ApplicationDevInfo.sharedStorage;
-
-public class SysWebViewSetting {
-
-
-    public static void initGlobalSetting(Application application){
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            // 安卓9.0后不允许多进程使用同一个数据目录
-            try {
-                WebView.setDataDirectorySuffix(AppUtils.getCurrentProcessName(application.getApplicationContext()));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        // 允许跨域
-        CookieManager.getInstance().setAcceptCookie(true);
-    }
-
-    /* 保存cookie */
-    public static void saveCurrentCookie(WebView webView, String url){
-        CookieManager cookieManager = CookieManager.getInstance();
-        String cookieStr = cookieManager.getCookie(url);
-        SharedPreferences sp = sharedStorage(webView.getContext());
-        sp.edit().putString("CURRENT_COOKIE",cookieStr).apply();
-        LLog.print("保存最新cookie>> URL = "+ url+"\nCOOKIE = "+ cookieStr);
-    }
-
-    /* 使用cookie */
-    public static void useCurrentCookie(WebView webView, String url){
-        CookieManager cookieManager = CookieManager.getInstance();
-        String cookieStrOld = cookieManager.getCookie(url);
-
-        SharedPreferences sp = sharedStorage(webView.getContext());
-        String cookieStr = sp.getString("CURRENT_COOKIE",null);
-        if (cookieStr==null) return;
-        cookieManager.removeAllCookie();
-        String[] arr = cookieStr.split(";");
-        for (String kv :arr){
-            cookieManager.setCookie(url,kv);
-        }
-
-        cookieManager.flush();
-        LLog.print("使用最新cookie>> URL = "+ url+"\nCOOKIE = "+ cookieStr
-                +"\n原COOCKIE = "+cookieStrOld
-                +"\n现COOCKIE = "+ cookieManager.getCookie(url));
-    }
-
+class CommonFunc {
 
     @SuppressLint("SetJavaScriptEnabled")
     protected static void initSetting(SysWebView webview) {
         Context context = webview.getContext();
         WebSettings settings = webview.getSettings();
-
         //设置WebView是否允许执行JavaScript脚本，默认false
         settings.setJavaScriptEnabled(true);
         //设置js可以直接打开窗口，如window.open()，默认为false
         settings.setJavaScriptCanOpenWindowsAutomatically(true);
-        //设置WebView是否支持多窗口
-        settings.setSupportMultipleWindows(true);
 
         //是否需要用户的手势进行媒体播放
         settings.setMediaPlaybackRequiresUserGesture(false);
@@ -94,16 +37,16 @@ public class SysWebViewSetting {
         //是否允许WebView度超出以概览的方式载入页面
         settings.setLoadWithOverviewMode(true);
 
-
+        //设置WebView是否支持多窗口
+        settings.setSupportMultipleWindows(false);
 
         //应用缓存API是否可用
         settings.setAppCacheEnabled(true);
+
         //数据缓存
         settings.setAppCachePath( context.getDir("webcache",0).getPath());
-        settings.setAppCacheMaxSize(100*1024*1024);
 
         //数据库
-        settings.setDatabasePath(context.getDir("webdatabase",0).getPath());
         settings.setDatabaseEnabled(true);
 
         //DOM存储API是否可用
@@ -133,11 +76,6 @@ public class SysWebViewSetting {
         //是否禁止网络图片加载
         settings.setBlockNetworkImage(false);
 
-        // 缓存模式
-//        LOAD_CACHE_ONLY:不使用网络，只读取本地缓存数据
-//        LOAD_DEFAULT:根据cache-control决定是否从网络上取数据。
-//        LOAD_NO_CACHE: 不使用缓存，只从网络获取数据
-//        LOAD_CACHE_ELSE_NETWORK，只要本地有，无论是否过期，或者no-cache，都使用缓存中的数据
         settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
         settings.setRenderPriority(WebSettings.RenderPriority.HIGH);
         settings.setDefaultTextEncodingName("UTF-8");
@@ -152,12 +90,6 @@ public class SysWebViewSetting {
         webview.removeJavascriptInterface("searchBoxJavaBridge");
         webview.removeJavascriptInterface("accessibility");
         webview.removeJavascriptInterface("accessibilityTraversal");
-
-        // 跨域cookie读取
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            CookieManager.getInstance().setAcceptThirdPartyCookies(webview, true);
-        }
-
     }
 
 

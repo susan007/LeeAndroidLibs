@@ -22,8 +22,6 @@ import androidx.annotation.Nullable;
 import lee.bottle.lib.toolset.log.LLog;
 import lee.bottle.lib.toolset.util.AppUtils;
 
-import static lee.bottle.lib.webh5.SysWebViewSetting.saveCurrentCookie;
-
 
 public class SysWebViewClient extends WebViewClient {
 
@@ -171,6 +169,7 @@ public class SysWebViewClient extends WebViewClient {
             }
             super.onReceivedError(webView, webResourceRequest, webResourceError);
         }
+
     }
 
     /** 如果浏览器需要重新发送POST请求，可以通过这个时机来处理。默认是不重新发送数据 */

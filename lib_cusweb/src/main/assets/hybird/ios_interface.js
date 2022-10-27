@@ -96,15 +96,7 @@
 
     /* JS 打印native控制台信息 */
     function println(log) {
-        try {
-            if (typeof log === "undefined") return;
-            if (typeof log === "object") {
-                log = JSON.stringify(log);
-            }
-            alert(log);
-        } catch (exception) {
-            console.error(exception);
-        }
+
     }
 
     /* JS 获取设备信息 */
@@ -126,19 +118,18 @@
             if (typeof data === "object") {
                 data = JSON.stringify(data);
             }
-            var obj = {
-                url:url,
-                type:data
-            };
-            jsInvokeNative("openWindow", JSON.stringify(obj));
+            var obj = {url:url,type:data};
+            window.webkit.messageHandlers.Param.postMessage({method: "openWindow",content: _content});
+
         } catch (exception) {
             console.error(exception);
         }
     }
+
     /* JS 关闭当前页面 */
     function closeCurrentWindow(bool){
         try{
-            jsInvokeNative("closeCurrentWindow", bool);
+            window.webkit.messageHandlers.Param.postMessage({method: "closeCurrentWindow",content: _content});
         }catch(exception){
             console.error(exception);
         }
@@ -147,11 +138,21 @@
     /* JS 页面加载完成通知 */
     function onInitializationComplete() {
         try {
-            jsInvokeNative("pageLoadComplete", url, data);
+            window.webkit.messageHandlers.Param.postMessage({method: "onInitializationComplete"});
         } catch (exception) {
             console.error(exception);
         }
     }
+
+    /* 检查APP是否需要升级 */
+    function checkVersion(){
+     try {
+                window.webkit.messageHandlers.Param.postMessage({method: "checkVersion"});
+        } catch (exception) {
+                console.error(exception);
+        }
+    }
+
 
     /***************************************2、交互方法****************************************************************/
 
@@ -198,7 +199,7 @@
             js_invoke_native_callback_ids[_callbackId] = _response_callback;
         }
         try {
-            //jxs?：这里是绑定在webview的回调上的
+
             window.webkit.messageHandlers.Param.postMessage({
                 method: _method,
                 content: _content,
@@ -214,11 +215,11 @@
     }
 
     /* 
-[native.callbackInvoke]
-ios没这个方法，用的window.ICEPayResult,方法名例如【PayResult、ICEPayResult、forceLogout】
-2、返回js invoke native 的结果 resp
-* js调用 native后, iOS native主动发起的结果回调
-*/
+    [native.callbackInvoke]
+    ios没这个方法，用的window.ICEPayResult,方法名例如【PayResult、ICEPayResult、forceLogout】
+    2、返回js invoke native 的结果 resp
+    * js调用 native后, iOS native主动发起的结果回调
+    */
     function _jsInvokeNativeResponse(callback_fun_id, result) {
         setTimeout(function () {
             let response_callback = js_invoke_native_callback_ids[callback_fun_id];
@@ -233,12 +234,10 @@ ios没这个方法，用的window.ICEPayResult,方法名例如【PayResult、ICE
             response_callback(result);
         });
     }
-    
-    
 
     /* 
-    【native.invoke】
-     3、iOS native对js的主动调用
+   *【native.invoke】
+   * 3、iOS native对js的主动调用
    * function_name = js端的函数名
    * content=文本字符串
    * android native端的回调函数id
@@ -267,7 +266,7 @@ ios没这个方法，用的window.ICEPayResult,方法名例如【PayResult、ICE
             }
             if (isNotNull(native_callback_id)) {
                 try {
-                    //jxs?：这里是绑定在webview的回调上的
+
                     window.webkit.messageHandlers.NativeInvokeParam.postMessage({
                         content: value,
                         callbackId: native_callback_id,
@@ -307,6 +306,7 @@ ios没这个方法，用的window.ICEPayResult,方法名例如【PayResult、ICE
         openWindow:openWindow,//JS 打开其他页面(url,打开类型) push 压入一个新页面 ; pushAndRemove 移除当前页 打开新页面 ; pushAndRemoveAll 移除所有历史页面 打开新页面
         closeCurrentWindow:closeCurrentWindow,//JS 关闭当前页  false - 强制关闭当前页 ; true - 强制整个关闭应用
 
+        checkVersion:checkVersion,// 检查App是否需要升级
 
         onInitializationComplete: onInitializationComplete,  //JS 通知页面初始化加载完成
     }

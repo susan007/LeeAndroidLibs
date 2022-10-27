@@ -1,25 +1,21 @@
 package lee.bottle.lib.webh5;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.webkit.JavascriptInterface;
+
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 
 import lee.bottle.lib.toolset.log.LLog;
 import lee.bottle.lib.toolset.util.AppUtils;
 import lee.bottle.lib.toolset.util.GsonUtils;
 import lee.bottle.lib.webh5.interfaces.DynamicJSInterfaceI;
 
-
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-
 public class JSInterface {
 
     // 动态实现的api接口
-    private static final Map<String,DynamicJSInterfaceI> dynamicJSInterfaceObjectMap = new HashMap<>();
+    private static final Map<String, DynamicJSInterfaceI> dynamicJSInterfaceObjectMap = new HashMap<>();
 
     public static <T extends DynamicJSInterfaceI>  void addDynamicInterface(T interfaceObject){
         // 查询所有当前实现的的方法
@@ -39,7 +35,7 @@ public class JSInterface {
         return dynamicJSInterfaceObjectMap.get(methodName);
     }
 
-    public static Object callDynamicJSInterfaceI(DynamicJSInterfaceI dynamicInterface,String method, String data) throws Exception {
+    public static Object callDynamicJSInterfaceI(DynamicJSInterfaceI dynamicInterface, String method, String data) throws Exception {
         Object val;
         if(data == null){
             Method m = dynamicInterface.getClass().getDeclaredMethod(method);
@@ -69,7 +65,7 @@ public class JSInterface {
     }
 
 
-    public static class DefaultFunction extends JSInterfaceFunction{
+    public static class DefaultFunction extends JSInterfaceFunction {
 
         public DefaultFunction(JSInterface jsInterface) {
             super(jsInterface);
@@ -89,14 +85,18 @@ public class JSInterface {
 
         @JavascriptInterface
         @Override
-        public void openWindow(String url, String data) {
-            LLog.print("JS 请求打开链接 URL= "+url+" ,DATA= "+ data);
+        public void openWindow(String url, String type) {
+            LLog.print("JS 请求打开链接 URL= "+url+" ,TYPE= "+ type);
+        }
+
+        @JavascriptInterface
+        @Override
+        public void closeCurrentWindow(String bool) {
+            LLog.print("********* 关闭当前页面 *******");
         }
 
         @Override
-        public void closeCurrentWindow(String bool) {
-
-        }
+        public void checkVersion() { LLog.print("********* 检查应用最新版本 *******"); }
 
         @JavascriptInterface
         @Override

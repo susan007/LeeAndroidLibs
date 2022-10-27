@@ -13,12 +13,11 @@ import android.webkit.WebView;
 import androidx.annotation.NonNull;
 
 import lee.bottle.lib.toolset.log.LLog;
-import lee.bottle.lib.webh5.interfaces.DeviceInfoI;
-import lee.bottle.lib.webh5.interfaces.PromptMessageI;
-
 import lee.bottle.lib.webh5.interfaces.AlertMessageI;
 import lee.bottle.lib.webh5.interfaces.ConfirmMessageI;
+import lee.bottle.lib.webh5.interfaces.DeviceInfoI;
 import lee.bottle.lib.webh5.interfaces.LoadErrorI;
+import lee.bottle.lib.webh5.interfaces.PromptMessageI;
 import lee.bottle.lib.webh5.interfaces.WebProgressI;
 import lee.bottle.lib.webh5.interfaces.WebResourceRequestI;
 
@@ -127,7 +126,7 @@ public class SysWebView extends WebView {
     // 回退事件
     public boolean onBackPressed() {
 //        LLog.print(this +" ("+ getUrl() +") 是否允许回退: "+ canGoBack());
-//        LLog.print(this +" 回退事件,是否允许回退: "+ canGoBack());
+        LLog.print(this +" 回退事件,是否允许回退: "+ canGoBack());
         if (this.canGoBack()) {
             this.goBack();
             return true;
@@ -154,7 +153,7 @@ public class SysWebView extends WebView {
     // 文件拣选
     private static void onFilePathCallback(Uri[] uris){
         if (_filePathCallback != null) {
-            _filePathCallback.onReceiveValue(uris);
+            _filePathCallback.onReceiveValue(null);
             _filePathCallback = null;
         }
     }
@@ -173,7 +172,7 @@ public class SysWebView extends WebView {
             onFilePathCallback(null);
         }
 
-        return true;
+        return false;
     }
 
 
@@ -182,10 +181,10 @@ public class SysWebView extends WebView {
     public void onActivityResultHandle(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_SELECT_FILE){
             // 文件选择
-            Uri[] uris = WebChromeClient.FileChooserParams.parseResult(resultCode, data);
-            onFilePathCallback(uris);
+            onFilePathCallback(WebChromeClient.FileChooserParams.parseResult(resultCode, data));
         }
     }
+
 
 
 }

@@ -109,7 +109,6 @@ public class SysWebChromeClient extends WebChromeClient {
     @Override
     public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
 
-
         Log.w("[CONSOLE]", "file: " + consoleMessage.sourceId() + " (" + consoleMessage.lineNumber() + ") " + consoleMessage.messageLevel() + " >>\t" + consoleMessage.message());
         return true;
     }

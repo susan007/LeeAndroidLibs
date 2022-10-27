@@ -4,16 +4,15 @@ import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 import android.webkit.JavascriptInterface;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
+
 import lee.bottle.lib.toolset.log.LLog;
 import lee.bottle.lib.toolset.threadpool.IOUtils;
 import lee.bottle.lib.toolset.util.GsonUtils;
 import lee.bottle.lib.toolset.util.StringUtils;
 import lee.bottle.lib.webh5.interfaces.DynamicJSInterfaceI;
 import lee.bottle.lib.webh5.interfaces.JSResponseCallback;
-
-
-import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
 
 import static lee.bottle.lib.toolset.os.ApplicationDevInfo.sharedStorage;
 
@@ -166,6 +165,10 @@ public abstract class JSInterfaceFunction {
 
     /* 打开窗口 push 压入一个新页面 ; pushAndRemove 移除当前页 打开新页面 ; pushAndRemoveAll 移除所有历史页面 打开新页面*/
     public abstract void openWindow(String url,String type);
+
     /* 结束当前窗口 false - 强制关闭当前页;true - 强制整个关闭应用 */
     public abstract void closeCurrentWindow(String bool);
+
+    /* 检查设备是否需要升级 */
+    public abstract void checkVersion();
 }

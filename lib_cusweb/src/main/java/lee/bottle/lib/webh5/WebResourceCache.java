@@ -5,6 +5,7 @@ import android.webkit.WebResourceResponse;
 
 import androidx.annotation.NonNull;
 import androidx.collection.LruCache;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.PipedInputStream;
@@ -32,7 +33,7 @@ public class WebResourceCache implements WebResourceRequestI {
 
     private static final long CLEAR_TIME = 24 * 60 * 60 * 1000L; // 一天
 
-    private static final int cacheSize = (int) (Runtime.getRuntime().maxMemory()/8);
+    private static final int cacheSize = (int) (Runtime.getRuntime().maxMemory()/16);
 
     private final LruCache<String,byte[]> resourceMemCache
             = new LruCache<String,byte[]>(cacheSize){
@@ -130,7 +131,6 @@ public class WebResourceCache implements WebResourceRequestI {
                 mimeType = "image/*";
 
             }
-
             if (endingStr.equals("mp3")){
                 mimeType = "audio/mpeg";
             }
@@ -138,16 +138,19 @@ public class WebResourceCache implements WebResourceRequestI {
             if (endingStr.equals("js")){
                 mimeType = "application/javascript";
             }
-
             if (endingStr.equals("css")){
                 mimeType = "text/css";
             }
 
             if (mimeType == null){
-//                if (isDebug) LLog.print("[缓存] 无法缓存URL: "+ url);
+//                LLog.print("[缓存] 无法缓存URL: "+ url);
                 return null;
             }
-//            if (isDebug) LLog.print("[缓存] 允许缓存URL: "+ url);
+//                LLog.print("[缓存] 允许缓存URL: "+ url);
+
+//            if(url.startsWith("http://121.37.6.129:9999/media/drug/1649399503000001159/0.jpg")){
+//                LLog.print("请求加载资源URL 后缀 url: "+ url);
+//            }
 
 
             md5 = StringUtils.strMD5(url);
@@ -167,7 +170,7 @@ public class WebResourceCache implements WebResourceRequestI {
         }
 
         try {
-            if (isDebug) LLog.print("请求加载资源URL: "+ url +" LOCAL: "+ resourceFile);
+//            LLog.print("请求加载资源URL: "+ url +" LOCAL: "+ resourceFile);
             //异步执行,读取文件
             final PipedOutputStream out = new PipedOutputStream();
             PipedInputStream inputStream = new PipedInputStream(out);
@@ -234,7 +237,7 @@ public class WebResourceCache implements WebResourceRequestI {
                                 resourceMemCache.put(newFileName,bytes);
                             }
                         }
-                       if (isDebug) LLog.print("下载("+downloadResourceUrl+") 缓存资源("+temp+") 重命名 (" + newFileName+ ") "+ (isSuccess?"成功":"失败"));
+//                        LLog.print("下载("+downloadResourceUrl+") 缓存资源("+temp+") 重命名 (" + newFileName+ ") "+ (isSuccess?"成功":"失败"));
                     }
                 }
             }));
