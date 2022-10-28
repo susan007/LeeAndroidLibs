@@ -9,17 +9,27 @@ import static lee.bottle.lib.toolset.http.FileServerClient.downFileURL;
 
 /** 服务APP升级配置 */
 public class AppUploadConfig {
+    public static String CONFIG_JSON_FILE_PATH = "/config.json";
     int serverVersion = 0;
     String updateMessage = "发现新版本,请更新!";
     String apkLink = "/drug.apk";
     int forceUpdate = 0; //是否强制更新
+
+    private static String convertToFileServerURL(String path){
+        if (!StringUtils.isEmpty(path)
+                && (!path.startsWith("http") && !path.startsWith("https"))){
+            return downFileURL(path);
+        }
+        return path;
+    }
+
     // 加载服务器配置信息URL
     private static String _loadServerConfigJson(int retry,int max) {
-        String url = downFileURL("/config.json");
+        String url = convertToFileServerURL(CONFIG_JSON_FILE_PATH);
         try {
-            LLog.print("加载服务器配置信息: " + url);
+            LLog.print("服务器APK版本请求:\t" + url);
             String json = FileServerClient.text(url).trim().replaceAll("\\s*","");
-            //LLog.print("获取服务器配置信息:\n"+json);
+            LLog.print("服务器APK版本响应:\t"+json);
             return json;
         } catch (Exception e) {
             LLog.print(retry+"/"+max+" 加载服务器配置信息失败,URL="+ url +" ,错误原因:\n"+e);
@@ -35,10 +45,7 @@ public class AppUploadConfig {
         String json = _loadServerConfigJson(0,10);
         AppUploadConfig config  =  GsonUtils.jsonToJavaBean(json, AppUploadConfig.class);
         if (config == null) config = new AppUploadConfig();
-        if (!StringUtils.isEmpty(config.apkLink)
-                && (!config.apkLink.startsWith("http") && !config.apkLink.startsWith("https"))){
-            config.apkLink = downFileURL(config.apkLink);
-        }
+        config.apkLink = convertToFileServerURL(config.apkLink);
         return config;
     }
 

@@ -3,6 +3,7 @@ package lee.bottle.lib.toolset.uptver;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.view.LayoutInflater;
@@ -32,10 +33,7 @@ import lee.bottle.lib.toolset.util.DialogUtils;
  */
 public class UpdateVersionServerImp{
 
-    /* 检测版本更新次数 */
-    private static int checkVersionUpdateIndex =0;
-
-    /* 通知栏 */
+    /* 下载进度通知栏 */
     private static  FrontNotification notification;
 
     /* 进度条 */
@@ -65,10 +63,20 @@ public class UpdateVersionServerImp{
     private static boolean checkAppVersionMatch(Activity activity,int remote) {
         if (remote==0)  return true;
         int localVersion = AppUtils.getVersionCode(activity);
-        LLog.print("当前应用版本号: "+ localVersion+" , 服务器版本号: "+ remote);
+        LLog.print("检查APP版本: 应用版本号: "+ localVersion+" ,服务器版本号: "+ remote);
         return  localVersion>= remote;
     }
 
+    // 检查版本更新
+    public static void checkVersion(final Activity activity, final boolean showMsg){
+        IOUtils.run(new Runnable() {
+            @Override
+            public void run() {
+                checkVersionAndDownload(activity,showMsg);
+            }
+        });
+    }
+    // 修改 进度条 更新进度
     private static void progressBarCircleDialogUpdate(final Activity activity, final String text) {
         if (activity == null || isHind) return;
         activity.runOnUiThread(new Runnable() {
@@ -102,6 +110,7 @@ public class UpdateVersionServerImp{
         });
     }
 
+    // 停止 进度条 更新进度
     private static void progressBarCircleDialogStop(final Activity activity) {
         if (activity == null) return;
         activity.runOnUiThread(new Runnable() {
@@ -138,6 +147,7 @@ public class UpdateVersionServerImp{
         }
     }
 
+    //更新进度条
     private static void updateNoticeBarProgress(int current){
         //打开进度指示条的通知栏
         if (notification!=null) notification.setProgress(100, current);
@@ -155,7 +165,7 @@ public class UpdateVersionServerImp{
     //检查版本进度并下载
     private static void checkVersionAndDownload(final Activity activity,final boolean showMsg) {
         try{
-            checkVersionUpdateIndex++;
+
             if ( activity == null) return;
 
             if (isExecute) {
@@ -174,12 +184,13 @@ public class UpdateVersionServerImp{
                 return;
             }
 
-            File apk = new File(activity.getCacheDir() + "/temp.apk");
+            File apk = new File(activity.getCacheDir() + String.format("/upt_%s.apk",activity.getPackageName()));
 
-            activityToast(activity,showMsg,"新版本("+config.serverVersion+") 准备下载");
+            LLog.print("新版本("+config.serverVersion+") 下载地址:"+ config.apkLink +" 存储位置:"+apk);
 
+            //打开进度条
             openNoticeBarProgress(activity,"更新应用");
-            LLog.print("下载APK URL: "+ config.apkLink);
+
             //下载apk
             apk = FileServerClient.downloadFile(config.apkLink, apk.getPath(), new HttpUtils.CallbackAbs() {
                 @Override
@@ -189,14 +200,14 @@ public class UpdateVersionServerImp{
                     if (showMsg) updateProgressBar(activity,current);
                 }
             });
-
+            // 关闭进度条
             closeNoticeBarProgress();
 
             if (apk == null || !apk.exists()) {
-                activityToast(activity,showMsg,"无法下载最新版本应用,请重新尝试");
+                activityToast(activity,showMsg,"下载最新版本应用失败");
                 return;
             }
-
+            // 打开下载弹框
             openInstallPromptBox(activity,config,apk,config.apkLink);
         }catch (Exception e){
             LLog.error(e);
@@ -205,19 +216,15 @@ public class UpdateVersionServerImp{
         }
     }
 
+    // 打开应用更新提示框
     private static void openInstallPromptBox(final Activity activity, final AppUploadConfig config, final File _apk,final String apkUrl) {
-
         //打开安装对话框
         if (activity == null) return;
-
+        if (updateVersionPromptBox == null) return;
         activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                if (config.forceUpdate == 0){
-                    normalUpdate(activity,_apk,config.updateMessage,apkUrl);
-                }else{
-                    forceUpdate(activity,_apk,config.updateMessage,apkUrl);
-                }
+                updateVersionPromptBox.callback(config.forceUpdate != 0,activity,_apk,config.updateMessage,apkUrl);
             }
         });
     }
@@ -242,9 +249,7 @@ public class UpdateVersionServerImp{
                             if (flag){
                                 new Timer().schedule(new TimerTask() {
                                     @Override
-                                    public void run() {
-                                        System.exit(0);
-                                    }
+                                    public void run() { System.exit(0); }
                                 },3000);
                             }
                         } else{
@@ -276,13 +281,22 @@ public class UpdateVersionServerImp{
                 });
     }
 
-    public static void checkVersion(final Activity activity, final boolean showMsg){
-        IOUtils.run(new Runnable() {
-            @Override
-            public void run() {
-                checkVersionAndDownload(activity,showMsg);
+
+    public static UpdateVersionPromptBox updateVersionPromptBox = new UpdateVersionPromptBox() {
+        @Override
+        public void callback(boolean isForceUpdate, Activity activity, File file, String updateMessage, String apkUrl) {
+            if (isForceUpdate){
+                forceUpdate(activity,file,updateMessage,apkUrl);
+            }else {
+                normalUpdate(activity,file,updateMessage,apkUrl);
             }
-        });
+        }
+    };
+
+    // 设置应用更新处理弹框
+    public static void setUpdateVersionPromptBox(UpdateVersionPromptBox updateVersionPromptBox){
+        if (updateVersionPromptBox == null) return;
+        UpdateVersionServerImp.updateVersionPromptBox = updateVersionPromptBox;
     }
 
 }
