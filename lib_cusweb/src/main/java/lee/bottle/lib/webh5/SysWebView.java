@@ -153,7 +153,7 @@ public class SysWebView extends WebView {
     // 文件拣选
     private static void onFilePathCallback(Uri[] uris){
         if (_filePathCallback != null) {
-            _filePathCallback.onReceiveValue(null);
+            _filePathCallback.onReceiveValue(uris);
             _filePathCallback = null;
         }
     }
