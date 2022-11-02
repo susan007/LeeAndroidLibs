@@ -172,7 +172,7 @@ public class SysWebView extends WebView {
             onFilePathCallback(null);
         }
 
-        return false;
+        return true;
     }
 
 
